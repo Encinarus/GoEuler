@@ -113,11 +113,13 @@ func TestGridProduct(t *testing.T) {
 	smallGrid := [][]int {
 		{1, 2, 3, 4},
 		{5, 6, 7, 8},
-		{9, 10, 11, 12},
+		{9, 10, 11, 17},
 		{13, 14, 15, 16},
 	}
 
 	assertEquals(t, 13*14*15*16, gridProduct(4, smallGrid))
+	assertEquals(t, 14*15*16, gridProduct(3, smallGrid))
+	assertEquals(t, 17*16, gridProduct(2, smallGrid))
 
 	grid := [][]int {
 		{8, 2, 22, 97, 38, 15, 0, 40, 0, 75, 4, 5, 7, 78, 52, 12, 50, 77, 91, 8},
@@ -142,7 +144,18 @@ func TestGridProduct(t *testing.T) {
 		{1, 70, 54, 71, 83, 51, 54, 69, 16, 92, 33, 48, 61, 43, 52, 1, 89, 19, 67, 48},
 	}
 
-	assertEquals(t, "", grid)
+	assertEquals(t, 70600674, gridProduct(4, grid))
 }
 
+func TestCountFactors(t *testing.T) {
+  assertEquals(t, 1, countFactors(1))
+  assertEquals(t, 2, countFactors(3))
+  assertEquals(t, 5, countFactors(16))
+  assertEquals(t, 6, countFactors(28))
+}
 
+func TestMinTriangleWithFactors(t *testing.T) {
+  assertEquals(t, 28, smallestTriangleWithMinimumFactorCount(5))
+  assertEquals(t, 76576500, smallestTriangleWithMinimumFactorCount(500))
+  
+}

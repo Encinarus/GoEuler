@@ -236,22 +236,86 @@ func sumPrimes(threshold int) int {
 	return sum
 }
 
-func maxValue(runLength, row, col int, grid [][]int) int {
-  
+func maxCellValue(runLength, row, col int, grid [][]int) int {
+  maxProduct := 0
 
-  return 1
+  products := [8]int { 1, 1, 1, 1, 1, 1, 1, 1 }
+  for i := 0; i < runLength; i++ {
+    products[0] *= grid[row - i][col]      // Up
+    products[1] *= grid[row + i][col]      // Down
+    products[2] *= grid[row][col - i]      // Left
+    products[3] *= grid[row][col + i]      // Right
+    products[4] *= grid[row - i][col - i]  // Up Left
+    products[5] *= grid[row - i][col + i]  // Up Right
+    products[6] *= grid[row + i][col - i]  // Down Left
+    products[7] *= grid[row + i][col + i]  // Down Right
+  }
+
+  for _, product := range products {
+    maxProduct = max(maxProduct, product)
+  }
+  return maxProduct
 }
 
 func gridProduct(runLength int, grid [][]int) int {
 	// Assume square grid with at least one row
 	height := len(grid)
+  bufferedHeight := height + (2*runLength)
 	width := len(grid[0])
+  bufferedWidth := width + (2*runLength)
 
-   
-	for y := 0; y < height; y++ {
-    
+  // Allocate grid in one shot, more efficient for static sized grid
+  // per effective go
+  bufferedGrid := make([][]int, bufferedHeight)
+  bufferedRows := make([]int, bufferedWidth * bufferedHeight)
+
+	for row := 0; row < bufferedHeight; row++ {
+    bufferedGrid[row], bufferedRows = bufferedRows[:bufferedWidth], bufferedRows[bufferedWidth:]
 	}
 
-	return height * width
+  for row := 0; row < height; row++ {
+    for col := 0; col < width; col++ {
+      bufferedGrid[row + runLength][col + runLength] = grid[row][col]
+    }
+  }
+
+  // Now that we're set up, find maxValue for every cell
+  maxProduct := 0
+  for row := runLength; row < height + runLength; row++ {
+    for col := runLength; col < width + runLength; col++ {
+      maxProduct = max(maxProduct, maxCellValue(runLength, row, col, bufferedGrid))
+    }
+  }
+
+	return maxProduct
+}
+
+func countFactors(triangleNumber int) int {
+  sqrt := int(math.Sqrt(float64(triangleNumber)))
+
+  factorCount := 0
+  for i := 1; i <= sqrt; i++ {
+    if triangleNumber % i == 0 {
+      factorCount++
+      if i*i != triangleNumber {
+        factorCount++
+      }
+    }
+  }
+
+  return factorCount
+}
+
+func smallestTriangleWithMinimumFactorCount(minFactorCount int) int {
+  triangle := 0
+  for i := 1; true; i++ {
+    triangle += i
+
+    if countFactors(triangle) > minFactorCount {
+      break
+    }
+  }
+
+  return triangle
 }
 
