@@ -11,6 +11,7 @@ import (
 	"container/list"
 	"fmt"
 	"math"
+  "math/big"
 	"strconv"
 	"strings"
 )
@@ -317,5 +318,56 @@ func smallestTriangleWithMinimumFactorCount(minFactorCount int) int {
   }
 
   return triangle
+}
+
+func sumLargeNumbers(largeNumbers []*big.Int, leadingDigits int) string {
+  sum := big.NewInt(0)
+  for _, num := range largeNumbers {
+    sum.Add(sum, num)
+  }
+
+  return sum.String()[:leadingDigits]
+}
+
+func nextCollatz(seed int) int {
+  if seed % 2 == 0 {
+    return seed / 2
+  } else {
+    return seed * 3 + 1
+  }
+}
+
+func cachedCollatzLength(seed int, cachedLengths map[int]int) int {
+  length, exists := cachedLengths[seed]
+  if exists {
+    return length
+  }
+
+  if seed <= 0 {
+    fmt.Println("What? Broken conjecture")
+    return 0
+  }
+
+  next := nextCollatz(seed)
+  cachedLengths[seed] = cachedCollatzLength(next, cachedLengths) + 1
+
+  return cachedLengths[seed]
+}
+
+func largestCollatzLength(maxValue int) (int, int) {
+  cachedLengths := make(map[int]int)
+  cachedLengths[1] = 1
+
+  maxLength := 0
+  bestValue := 1
+  for i := 1; i <= maxValue; i++ {
+    length := cachedCollatzLength(i, cachedLengths)
+    if length > maxLength {
+      maxLength = length
+      bestValue = i
+    }
+  }
+
+  return maxLength, bestValue
 }
 
