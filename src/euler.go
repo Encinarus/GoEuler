@@ -1,10 +1,3 @@
-/**
- * Created with IntelliJ IDEA.
- * User: alek
- * Date: 6/21/13
- * Time: 8:59 AM
- * To change this template use File | Settings | File Templates.
- */
 package main
 
 import (
@@ -378,14 +371,35 @@ func nextCollatz(seed int) int {
 func cachedCollatzLength(seed int, cachedLengths map[int]int) int {
   length := 0
 
+  // List and Map were both slower than appending to slices
+  // appending to slices was slower than the gain from having a fuller cache
+  // This would be a fun thing to profile, perhaps with a smarter 
+  // slice type? Having something closer to an ArrayList in Java may work
+  // best for this.
+
+  //visitedCollatz := list.New()
+  visitedCollatz := make([]int, 0)
   for next := seed; next > 0; next = nextCollatz(next) {
     cachedLength, exists := cachedLengths[next]
     if exists {
       length += cachedLength
       break
     }
+   // visitedCollatz = append(visitedCollatz, next)
+
+		//visitedCollatz.PushBack(next)
     length++
   }
+
+  // Fill in cache for the intermediate steps
+  for i := len(visitedCollatz) - 1; i >= 0; i-- {
+  //  cachedLengths[visitedCollatz[i]] = length - i
+  }
+  //visitedLength := length
+  //for i := visitedCollatz.Front(); i != nil; i = i.Next() {
+  //  cachedLengths[int(i.Value.(int))] = visitedLength
+  //  visitedLength--
+  //}
 
   cachedLengths[seed] = length
   return length

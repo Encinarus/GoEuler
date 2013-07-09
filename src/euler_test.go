@@ -1,10 +1,3 @@
-/**
- * Created with IntelliJ IDEA.
- * User: alek
- * Date: 6/26/13
- * Time: 9:09 PM
- * To change this template use File | Settings | File Templates.
- */
 package main
 
 import (
