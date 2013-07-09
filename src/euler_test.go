@@ -148,11 +148,13 @@ func TestGridProduct(t *testing.T) {
 	assertEquals(t, 70600674, gridProduct(4, grid))
 }
 
-func TestCountFactors(t *testing.T) {
-  assertEquals(t, 1, countFactors(1))
-  assertEquals(t, 2, countFactors(3))
-  assertEquals(t, 5, countFactors(16))
-  assertEquals(t, 6, countFactors(28))
+func TestListFactors(t *testing.T) {
+  knownFactors := make(map[int][]int)
+  primes := primesTo(30)
+  assertEquals(t, 1, listFactors(1, primes, knownFactors))
+  assertEquals(t, 2, listFactors(3, primes, knownFactors))
+  assertEquals(t, 5, listFactors(16, primes, knownFactors))
+  assertEquals(t, 6, listFactors(28, primes, knownFactors))
 }
 
 func TestMinTriangleWithFactors(t *testing.T) {

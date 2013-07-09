@@ -89,7 +89,7 @@ func max(a int, b int) int {
 	return b
 }
 
-func factor(primes []int, value int) int {
+func maxPrimeFactor(primes []int, value int) int {
 	//original := value
 	largest := 1
 
@@ -110,7 +110,7 @@ func factor(primes []int, value int) int {
 func largestPrimeFactor(value int) int {
 	maxPrime := int(math.Sqrt(float64(value)) + 1)
 	primes := primesTo(maxPrime)
-	return factor(primes, value)
+	return maxPrimeFactor(primes, value)
 }
 
 func isPalindrome(str string) bool {
@@ -291,28 +291,66 @@ func gridProduct(runLength int, grid [][]int) int {
 	return maxProduct
 }
 
-func countFactors(triangleNumber int) int {
-  sqrt := int(math.Sqrt(float64(triangleNumber)))
+func listFactors(num int, primes []int, cache map[int][]int) int {
+  sqrt := int(math.Sqrt(float64(num)))
 
-  factorCount := 0
-  for i := 1; i <= sqrt; i++ {
-    if triangleNumber % i == 0 {
-      factorCount++
-      if i*i != triangleNumber {
-        factorCount++
+  _, precached := cache[num]
+  if precached {
+    return len(cache[num])
+  }
+  localFactors := make(map[int]bool)
+
+  localFactors[1] = true
+  localFactors[num] = true
+
+  for _, prime := range primes {
+    if prime > sqrt {
+      break;
+    }
+
+    if num % prime == 0 {
+      _, exists := localFactors[prime]
+      if exists {
+        continue
+      }
+
+      otherFactor := num / prime
+
+      localFactors[prime] = true
+      localFactors[otherFactor] = true
+
+      listFactors(otherFactor, primes, cache) // Fill in the cache
+
+      for _, factor := range cache[otherFactor] {
+        localFactors[factor] = true
+        localFactors[prime * factor] = true
       }
     }
   }
 
-  return factorCount
+  factors := make([]int, len(localFactors))
+  i := 0
+  for factor, _ := range localFactors {
+    factors[i] = factor
+    i++
+  }
+
+  cache[num] = factors
+
+  return len(factors)
 }
 
 func smallestTriangleWithMinimumFactorCount(minFactorCount int) int {
   triangle := 0
+
+  knownFactors := make(map[int][]int)
+  knownFactors[1] = []int {1}
+
+  primes := primesTo(100000)
   for i := 1; true; i++ {
     triangle += i
 
-    if countFactors(triangle) > minFactorCount {
+    if listFactors(triangle, primes, knownFactors) > minFactorCount {
       break
     }
   }
@@ -338,20 +376,19 @@ func nextCollatz(seed int) int {
 }
 
 func cachedCollatzLength(seed int, cachedLengths map[int]int) int {
-  length, exists := cachedLengths[seed]
-  if exists {
-    return length
+  length := 0
+
+  for next := seed; next > 0; next = nextCollatz(next) {
+    cachedLength, exists := cachedLengths[next]
+    if exists {
+      length += cachedLength
+      break
+    }
+    length++
   }
 
-  if seed <= 0 {
-    fmt.Println("What? Broken conjecture")
-    return 0
-  }
-
-  next := nextCollatz(seed)
-  cachedLengths[seed] = cachedCollatzLength(next, cachedLengths) + 1
-
-  return cachedLengths[seed]
+  cachedLengths[seed] = length
+  return length
 }
 
 func largestCollatzLength(maxValue int) (int, int) {
