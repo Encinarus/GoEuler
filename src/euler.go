@@ -378,14 +378,14 @@ func cachedCollatzLength(seed int, cachedLengths map[int]int) int {
   // best for this.
 
   //visitedCollatz := list.New()
-  visitedCollatz := make([]int, 0)
+  visitedCollatz := make([]int, 0, 5)
   for next := seed; next > 0; next = nextCollatz(next) {
     cachedLength, exists := cachedLengths[next]
     if exists {
       length += cachedLength
       break
     }
-   // visitedCollatz = append(visitedCollatz, next)
+    //visitedCollatz = append(visitedCollatz, next)
 
 		//visitedCollatz.PushBack(next)
     length++
@@ -393,7 +393,7 @@ func cachedCollatzLength(seed int, cachedLengths map[int]int) int {
 
   // Fill in cache for the intermediate steps
   for i := len(visitedCollatz) - 1; i >= 0; i-- {
-  //  cachedLengths[visitedCollatz[i]] = length - i
+   // cachedLengths[visitedCollatz[i]] = length - i
   }
   //visitedLength := length
   //for i := visitedCollatz.Front(); i != nil; i = i.Next() {
