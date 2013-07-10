@@ -4,7 +4,7 @@ import (
 	"container/list"
 	"fmt"
 	"math"
-  "math/big"
+	"math/big"
 	"strconv"
 	"strings"
 )
@@ -231,194 +231,193 @@ func sumPrimes(threshold int) int {
 }
 
 func maxCellValue(runLength, row, col int, grid [][]int) int {
-  maxProduct := 0
+	maxProduct := 0
 
-  products := [8]int { 1, 1, 1, 1, 1, 1, 1, 1 }
-  for i := 0; i < runLength; i++ {
-    products[0] *= grid[row - i][col]      // Up
-    products[1] *= grid[row + i][col]      // Down
-    products[2] *= grid[row][col - i]      // Left
-    products[3] *= grid[row][col + i]      // Right
-    products[4] *= grid[row - i][col - i]  // Up Left
-    products[5] *= grid[row - i][col + i]  // Up Right
-    products[6] *= grid[row + i][col - i]  // Down Left
-    products[7] *= grid[row + i][col + i]  // Down Right
-  }
+	products := [8]int{1, 1, 1, 1, 1, 1, 1, 1}
+	for i := 0; i < runLength; i++ {
+		products[0] *= grid[row-i][col]   // Up
+		products[1] *= grid[row+i][col]   // Down
+		products[2] *= grid[row][col-i]   // Left
+		products[3] *= grid[row][col+i]   // Right
+		products[4] *= grid[row-i][col-i] // Up Left
+		products[5] *= grid[row-i][col+i] // Up Right
+		products[6] *= grid[row+i][col-i] // Down Left
+		products[7] *= grid[row+i][col+i] // Down Right
+	}
 
-  for _, product := range products {
-    maxProduct = max(maxProduct, product)
-  }
-  return maxProduct
+	for _, product := range products {
+		maxProduct = max(maxProduct, product)
+	}
+	return maxProduct
 }
 
 func gridProduct(runLength int, grid [][]int) int {
 	// Assume square grid with at least one row
 	height := len(grid)
-  bufferedHeight := height + (2*runLength)
+	bufferedHeight := height + (2 * runLength)
 	width := len(grid[0])
-  bufferedWidth := width + (2*runLength)
+	bufferedWidth := width + (2 * runLength)
 
-  // Allocate grid in one shot, more efficient for static sized grid
-  // per effective go
-  bufferedGrid := make([][]int, bufferedHeight)
-  bufferedRows := make([]int, bufferedWidth * bufferedHeight)
+	// Allocate grid in one shot, more efficient for static sized grid
+	// per effective go
+	bufferedGrid := make([][]int, bufferedHeight)
+	bufferedRows := make([]int, bufferedWidth*bufferedHeight)
 
 	for row := 0; row < bufferedHeight; row++ {
-    bufferedGrid[row], bufferedRows = bufferedRows[:bufferedWidth], bufferedRows[bufferedWidth:]
+		bufferedGrid[row], bufferedRows = bufferedRows[:bufferedWidth], bufferedRows[bufferedWidth:]
 	}
 
-  for row := 0; row < height; row++ {
-    for col := 0; col < width; col++ {
-      bufferedGrid[row + runLength][col + runLength] = grid[row][col]
-    }
-  }
+	for row := 0; row < height; row++ {
+		for col := 0; col < width; col++ {
+			bufferedGrid[row+runLength][col+runLength] = grid[row][col]
+		}
+	}
 
-  // Now that we're set up, find maxValue for every cell
-  maxProduct := 0
-  for row := runLength; row < height + runLength; row++ {
-    for col := runLength; col < width + runLength; col++ {
-      maxProduct = max(maxProduct, maxCellValue(runLength, row, col, bufferedGrid))
-    }
-  }
+	// Now that we're set up, find maxValue for every cell
+	maxProduct := 0
+	for row := runLength; row < height+runLength; row++ {
+		for col := runLength; col < width+runLength; col++ {
+			maxProduct = max(maxProduct, maxCellValue(runLength, row, col, bufferedGrid))
+		}
+	}
 
 	return maxProduct
 }
 
 func listFactors(num int, primes []int, cache map[int][]int) int {
-  sqrt := int(math.Sqrt(float64(num)))
+	sqrt := int(math.Sqrt(float64(num)))
 
-  _, precached := cache[num]
-  if precached {
-    return len(cache[num])
-  }
-  localFactors := make(map[int]bool)
+	_, precached := cache[num]
+	if precached {
+		return len(cache[num])
+	}
+	localFactors := make(map[int]bool)
 
-  localFactors[1] = true
-  localFactors[num] = true
+	localFactors[1] = true
+	localFactors[num] = true
 
-  for _, prime := range primes {
-    if prime > sqrt {
-      break;
-    }
+	for _, prime := range primes {
+		if prime > sqrt {
+			break
+		}
 
-    if num % prime == 0 {
-      _, exists := localFactors[prime]
-      if exists {
-        continue
-      }
+		if num%prime == 0 {
+			_, exists := localFactors[prime]
+			if exists {
+				continue
+			}
 
-      otherFactor := num / prime
+			otherFactor := num / prime
 
-      localFactors[prime] = true
-      localFactors[otherFactor] = true
+			localFactors[prime] = true
+			localFactors[otherFactor] = true
 
-      listFactors(otherFactor, primes, cache) // Fill in the cache
+			listFactors(otherFactor, primes, cache) // Fill in the cache
 
-      for _, factor := range cache[otherFactor] {
-        localFactors[factor] = true
-        localFactors[prime * factor] = true
-      }
-    }
-  }
+			for _, factor := range cache[otherFactor] {
+				localFactors[factor] = true
+				localFactors[prime*factor] = true
+			}
+		}
+	}
 
-  factors := make([]int, len(localFactors))
-  i := 0
-  for factor, _ := range localFactors {
-    factors[i] = factor
-    i++
-  }
+	factors := make([]int, len(localFactors))
+	i := 0
+	for factor, _ := range localFactors {
+		factors[i] = factor
+		i++
+	}
 
-  cache[num] = factors
+	cache[num] = factors
 
-  return len(factors)
+	return len(factors)
 }
 
 func smallestTriangleWithMinimumFactorCount(minFactorCount int) int {
-  triangle := 0
+	triangle := 0
 
-  knownFactors := make(map[int][]int)
-  knownFactors[1] = []int {1}
+	knownFactors := make(map[int][]int)
+	knownFactors[1] = []int{1}
 
-  primes := primesTo(100000)
-  for i := 1; true; i++ {
-    triangle += i
+	primes := primesTo(100000)
+	for i := 1; true; i++ {
+		triangle += i
 
-    if listFactors(triangle, primes, knownFactors) > minFactorCount {
-      break
-    }
-  }
+		if listFactors(triangle, primes, knownFactors) > minFactorCount {
+			break
+		}
+	}
 
-  return triangle
+	return triangle
 }
 
 func sumLargeNumbers(largeNumbers []*big.Int, leadingDigits int) string {
-  sum := big.NewInt(0)
-  for _, num := range largeNumbers {
-    sum.Add(sum, num)
-  }
+	sum := big.NewInt(0)
+	for _, num := range largeNumbers {
+		sum.Add(sum, num)
+	}
 
-  return sum.String()[:leadingDigits]
+	return sum.String()[:leadingDigits]
 }
 
 func nextCollatz(seed int) int {
-  if seed % 2 == 0 {
-    return seed / 2
-  } else {
-    return seed * 3 + 1
-  }
+	if seed%2 == 0 {
+		return seed / 2
+	} else {
+		return seed*3 + 1
+	}
 }
 
 func cachedCollatzLength(seed int, cachedLengths map[int]int) int {
-  length := 0
+	length := 0
 
-  // List and Map were both slower than appending to slices
-  // appending to slices was slower than the gain from having a fuller cache
-  // This would be a fun thing to profile, perhaps with a smarter 
-  // slice type? Having something closer to an ArrayList in Java may work
-  // best for this.
+	// List and Map were both slower than appending to slices
+	// appending to slices was slower than the gain from having a fuller cache
+	// This would be a fun thing to profile, perhaps with a smarter
+	// slice type? Having something closer to an ArrayList in Java may work
+	// best for this.
 
-  //visitedCollatz := list.New()
-  visitedCollatz := make([]int, 0, 5)
-  for next := seed; next > 0; next = nextCollatz(next) {
-    cachedLength, exists := cachedLengths[next]
-    if exists {
-      length += cachedLength
-      break
-    }
-    //visitedCollatz = append(visitedCollatz, next)
+	//visitedCollatz := list.New()
+	visitedCollatz := make([]int, 0, 5)
+	for next := seed; next > 0; next = nextCollatz(next) {
+		cachedLength, exists := cachedLengths[next]
+		if exists {
+			length += cachedLength
+			break
+		}
+		//visitedCollatz = append(visitedCollatz, next)
 
 		//visitedCollatz.PushBack(next)
-    length++
-  }
+		length++
+	}
 
-  // Fill in cache for the intermediate steps
-  for i := len(visitedCollatz) - 1; i >= 0; i-- {
-   // cachedLengths[visitedCollatz[i]] = length - i
-  }
-  //visitedLength := length
-  //for i := visitedCollatz.Front(); i != nil; i = i.Next() {
-  //  cachedLengths[int(i.Value.(int))] = visitedLength
-  //  visitedLength--
-  //}
+	// Fill in cache for the intermediate steps
+	for i := len(visitedCollatz) - 1; i >= 0; i-- {
+		// cachedLengths[visitedCollatz[i]] = length - i
+	}
+	//visitedLength := length
+	//for i := visitedCollatz.Front(); i != nil; i = i.Next() {
+	//  cachedLengths[int(i.Value.(int))] = visitedLength
+	//  visitedLength--
+	//}
 
-  cachedLengths[seed] = length
-  return length
+	cachedLengths[seed] = length
+	return length
 }
 
 func largestCollatzLength(maxValue int) (int, int) {
-  cachedLengths := make(map[int]int)
-  cachedLengths[1] = 1
+	cachedLengths := make(map[int]int)
+	cachedLengths[1] = 1
 
-  maxLength := 0
-  bestValue := 1
-  for i := 1; i <= maxValue; i++ {
-    length := cachedCollatzLength(i, cachedLengths)
-    if length > maxLength {
-      maxLength = length
-      bestValue = i
-    }
-  }
+	maxLength := 0
+	bestValue := 1
+	for i := 1; i <= maxValue; i++ {
+		length := cachedCollatzLength(i, cachedLengths)
+		if length > maxLength {
+			maxLength = length
+			bestValue = i
+		}
+	}
 
-  return maxLength, bestValue
+	return maxLength, bestValue
 }
-
